@@ -130,7 +130,7 @@ def preemp_sjk(processes):
 
     while ready_queue:
         #Sorts by rem time and then by priority, and finally by arrival for FCFS
-        ready_queue.sort(key= lambda x: (x.remaining_time, x.priority, x.arrival_time))
+        ready_queue.sort(key= lambda x: (x.remaining_time, x.priority, x.postprocess_arrival_time))
         
         #Finds the shortest burst time that has arrived, saves its index
         for i in range(len(ready_queue)):
@@ -142,6 +142,7 @@ def preemp_sjk(processes):
         timeline.append((current_process.name, current_time, current_time + 1))
         current_time += 1
         current_process.remaining_time -= 1
+        current_process.postprocess_arrival_time = current_time
 
         #Checks if it has completed, and if it has, pop it
         if current_process.remaining_time == 0:
@@ -150,6 +151,49 @@ def preemp_sjk(processes):
     
     data_displayer9000("Preemptive SJF", processes, timeline)
     return
+
+
+def preemp_prio(processes):
+    ready_queue = processes.copy()
+    timeline = []
+    current_time = 0
+    current_process = None
+
+    while ready_queue:
+        ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time))
+
+        index = None
+        for i in range(len(ready_queue)):
+            #As the queue keeps being sorted, keep track of the current process index
+            #due to "SAME PRIORITY, NO PREEMPTION, TO REDUCE CONTEXT SWITCH" assumption
+            if current_process != None and ready_queue[i].name == current_process.name:
+                index = i
+                break
+
+            #Again, same priority, no preemption
+            if ready_queue[i].arrival_time <= current_time and (
+                    current_process is None or current_process.priority != ready_queue[i].priority):
+                current_process = ready_queue[i]
+                index = i
+                break
+
+        if index is None:
+            current_time += 1
+            continue
+
+        timeline.append((current_process.name, current_time, current_time + 1))
+        current_time += 1
+        current_process.remaining_time -= 1
+        current_process.postprocess_arrival_time = current_time
+
+        if current_process.remaining_time == 0:
+            current_process.finishing_time = current_time
+            ready_queue.pop(index)
+            current_process = None
+
+    data_displayer9000("Preemptive Prio", processes, timeline)
+    return
+
 
 
 if __name__ == "__main__":
@@ -176,5 +220,6 @@ if __name__ == "__main__":
     non_preemp_sjf(deepcopy(processes))
     non_preemp_prio(deepcopy(processes))
     preemp_sjk(deepcopy(processes))
+    preemp_prio(deepcopy(processes))
 
 
