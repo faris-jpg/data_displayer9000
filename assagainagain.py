@@ -39,7 +39,9 @@ def round_robin(processes, quantum):
 
     while ready_queue:
         #Sort the queue first by arrival time, and then by priority,
-        # and finally by whether or not it has been executed before.
+        #and finally by whether or not it has been executed before.
+        #Use postprocess arrvial time as original arrival time should be kept for
+        #data to be displayed.
         ready_queue.sort(key=lambda x: (x.postprocess_arrival_time, x.priority, x.executed_before))
 
         #Take the first process in the queue.
@@ -96,7 +98,7 @@ def non_preemp_sjf(processes):
     return
 
 
-def non_preemp_prio(proceeses):
+def non_preemp_prio(processes):
     ready_queue = processes.copy()
     timeline = []
     current_time = 0
@@ -119,6 +121,34 @@ def non_preemp_prio(proceeses):
 
     data_displayer9000("Non Preemptive Priority", processes, timeline)
 
+    return
+
+def preemp_sjk(processes):
+    ready_queue = processes.copy()
+    timeline = []
+    current_time = 0
+
+    while ready_queue:
+        #Sorts by rem time and then by priority, and finally by arrival for FCFS
+        ready_queue.sort(key= lambda x: (x.remaining_time, x.priority, x.arrival_time))
+        
+        #Finds the shortest burst time that has arrived, saves its index
+        for i in range(len(ready_queue)):
+            if (ready_queue[i].arrival_time <= current_time):
+                current_process = ready_queue[i]
+                index = i
+                break
+
+        timeline.append((current_process.name, current_time, current_time + 1))
+        current_time += 1
+        current_process.remaining_time -= 1
+
+        #Checks if it has completed, and if it has, pop it
+        if current_process.remaining_time == 0:
+            current_process.finishing_time = current_time
+            ready_queue.pop(index)
+    
+    data_displayer9000("Preemptive SJF", processes, timeline)
     return
 
 
@@ -145,5 +175,6 @@ if __name__ == "__main__":
     round_robin(deepcopy(processes), quantum)
     non_preemp_sjf(deepcopy(processes))
     non_preemp_prio(deepcopy(processes))
+    preemp_sjk(deepcopy(processes))
 
 
