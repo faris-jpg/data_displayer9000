@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter.ttk import *
 from copy import deepcopy
 from prettytable import PrettyTable
+from math import floor
 
 class Process:
     def __init__(self, name, arrival_time, burst_time, priority):
@@ -38,6 +39,49 @@ def data_displayer9000(method, processes, timeline):
     result_text.insert(END, "\nGantt Chart:\n")
     result_text.insert(END, gantt_chart_str)
     result_text.insert(END, "\n\n")
+
+def plot_gantt_chart(timeline):
+    windowSize = 270 #SET WINDOW SIZE HERE (if no global)
+    timeEnd = timeline[-1][2] 
+    timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
+    
+    #gets the output for all the process names
+    nameOutput = ''
+    for task in timeline:
+        duration = task[2] - task[1]
+        nameOutput += task[0].ljust(timediv * duration, ' ') + '|'
+
+    #gets output for all the seconds
+    timeOutput = '|'
+    for task in timeline:
+        duration = task[2] - task[1]
+        timeOutput += str(task[1]).ljust( timediv * duration, ' ') + '|'
+    timeOutput += str(timeEnd)
+
+    #outputs the table with borders
+    border = '+' + ''.join('-' for x in range(len(timeOutput) - 1)) + '+'
+    print(border)
+    print('|' + nameOutput)
+    print(timeOutput)
+    print(border)
+
+def remove_duplicates(timeline):
+    updated_timeline = []  # new list for new timeline
+    i = 0  #iterator
+
+    while i < len(timeline):
+        current_process = timeline[i]
+        end_time = current_process[2] 
+
+        #checks next process if it is the same id
+        while i + 1 < len(timeline) and current_process[0] == timeline[i + 1][0]:
+            end_time = timeline[i + 1][2]  #update end time
+            i += 1
+
+        updated_timeline.append((current_process[0], current_process[1], end_time)) #appends
+        i += 1
+
+    return(updated_timeline)
 
 def round_robin(processes):
     quantum = 3
