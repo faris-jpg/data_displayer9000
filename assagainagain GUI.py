@@ -28,10 +28,16 @@ def data_displayer9000(method, processes, timeline):
             (process.finishing_time - process.arrival_time) - process.burst_time
         ])
 
+    gantt_chart = [f"{process[0]}({process[1]}-{process[2]})" for process in timeline]
+    gantt_chart_str = " -> ".join(gantt_chart)
+
     result_text.insert(END, f"{method}\n")
     result_text.insert(END, table.get_string())
     result_text.insert(END, "\n")
     result_text.insert(END, f"{timeline}\n\n")
+    result_text.insert(END, "\nGantt Chart:\n")
+    result_text.insert(END, gantt_chart_str)
+    result_text.insert(END, "\n\n")
 
 def round_robin(processes):
     quantum = 3
