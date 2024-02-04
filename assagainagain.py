@@ -194,27 +194,18 @@ def preemp_prio(processes):
     data_displayer9000("Preemptive Prio", processes, timeline)
     return
 
-
-
 if __name__ == "__main__":
-    # n = int(input("Number of processes:"))
-    # processes = []
-    # for i in range(n):
-    #     process_name = input("Name of Process: ")
-    #     arrival_time = int(input("Arrival time: "))
-    #     burst_time = int(input("Burst time: "))
-    #     priority = int(input("Priority: "))
-    #     processes.append(Process(process_name, arrival_time, burst_time, priority))
-    #quantum = int(input("Time Quantum for Round Robin: "))
-    quantum = 3
-    processes = [
-        Process("P0", 0, 6, 3),
-        Process("P1", 1, 4, 3),
-        Process("P2", 5, 6, 1),
-        Process("P3", 6, 6, 1),
-        Process("P4", 7, 6, 5),
-        Process("P5", 8, 6, 6)
-    ]
+    num_processes = int(input("Number of processes: "))
+    processes = []
+    
+    for i in range(num_processes):
+        process_name = f"P{i}"
+        arrival_time = int(input(f"Arrival time for {process_name}: "))
+        burst_time = int(input(f"Burst time for {process_name}: "))
+        priority = int(input(f"Priority for {process_name}: "))
+        processes.append(Process(process_name, arrival_time, burst_time, priority))
+    
+    quantum = int(input("Time Quantum for Round Robin: "))
 
     round_robin(deepcopy(processes), quantum)
     non_preemp_sjf(deepcopy(processes))
