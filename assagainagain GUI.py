@@ -5,6 +5,8 @@ from copy import deepcopy
 from prettytable import PrettyTable
 from math import floor
 
+WINDOWWIDTH = 125
+
 class Process:
     def __init__(self, name, arrival_time, burst_time, priority):
         self.name = name
@@ -37,7 +39,7 @@ def remove_duplicates(timeline):
 
 def plot_gantt_chart(timeline):
     timeline = remove_duplicates(timeline)
-    windowSize = 270 #SET WINDOW SIZE HERE (if no global)
+    windowSize = WINDOWWIDTH #SET WINDOW SIZE HERE (if no global)
     timeEnd = timeline[-1][2] 
     timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
 
@@ -57,10 +59,7 @@ def plot_gantt_chart(timeline):
     #outputs the table with borders
     border = '+' + ''.join('-' for x in range(len(timeOutput) - 1)) + '+'
     
-    output = border + '\n' 
-            + '|' + nameOutput + '\n'
-            + timeOutput + '\n'
-            + border
+    output = border + '\n'  + '|' + nameOutput + '\n' + timeOutput + '\n' + border
     return output
 
 
@@ -290,7 +289,7 @@ def create_gui():
     run_button_prio_preemp = Button(window, text="Run Preemptive Priority", command=lambda: run_algorithm(preemp_prio, process_entries, quantum_entry, output_text))
     run_button_prio_preemp.grid(row=4, column=5, padx=10)
 
-    output_text = Text(window, height=20, width=125, state=tk.DISABLED)
+    output_text = Text(window, height=20, width=WINDOWWIDTH, state=tk.DISABLED)
     output_text.grid(row=6, column=0, columnspan=10, padx=10, pady=10)
 
     window.mainloop()
