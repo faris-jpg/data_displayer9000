@@ -1,8 +1,8 @@
+import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
 from copy import deepcopy
 from prettytable import PrettyTable
-from math import floor
 
 class Process:
     def __init__(self, name, arrival_time, burst_time, priority):
@@ -16,89 +16,36 @@ class Process:
         self.postprocess_arrival_time = arrival_time
 
 def data_displayer9000(method, processes, timeline):
+    result = f"{method}\n"
     table = PrettyTable()
     table.field_names = ["Process", "Arrival Time", "Burst Time", "Finishing Time", "Turnaround Time", "Waiting Time"]
 
     for process in processes:
         table.add_row([
             process.name,
-            process.arrival_time, 
-            process.burst_time, 
-            process.finishing_time, 
-            process.finishing_time - process.arrival_time, 
+            process.arrival_time,
+            process.burst_time,
+            process.finishing_time,
+            process.finishing_time - process.arrival_time,
             (process.finishing_time - process.arrival_time) - process.burst_time
         ])
 
-    gantt_chart = [f"{process[0]}({process[1]}-{process[2]})" for process in timeline]
-    gantt_chart_str = " -> ".join(gantt_chart)
+    result += str(table) + "\n" + str(timeline)
+    return result
 
-    result_text.insert(END, f"{method}\n")
-    result_text.insert(END, table.get_string())
-    result_text.insert(END, "\n")
-    result_text.insert(END, f"{timeline}\n\n")
-    result_text.insert(END, "\nGantt Chart:\n")
-    result_text.insert(END, gantt_chart_str)
-    result_text.insert(END, "\n\n")
-
-def plot_gantt_chart(timeline):
-    windowSize = 270 #SET WINDOW SIZE HERE (if no global)
-    timeEnd = timeline[-1][2] 
-    timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
-    
-    #gets the output for all the process names
-    nameOutput = ''
-    for task in timeline:
-        duration = task[2] - task[1]
-        nameOutput += task[0].ljust(timediv * duration, ' ') + '|'
-
-    #gets output for all the seconds
-    timeOutput = '|'
-    for task in timeline:
-        duration = task[2] - task[1]
-        timeOutput += str(task[1]).ljust( timediv * duration, ' ') + '|'
-    timeOutput += str(timeEnd)
-
-    #outputs the table with borders
-    border = '+' + ''.join('-' for x in range(len(timeOutput) - 1)) + '+'
-    print(border)
-    print('|' + nameOutput)
-    print(timeOutput)
-    print(border)
-
-def remove_duplicates(timeline):
-    updated_timeline = []  # new list for new timeline
-    i = 0  #iterator
-
-    while i < len(timeline):
-        current_process = timeline[i]
-        end_time = current_process[2] 
-
-        #checks next process if it is the same id
-        while i + 1 < len(timeline) and current_process[0] == timeline[i + 1][0]:
-            end_time = timeline[i + 1][2]  #update end time
-            i += 1
-
-        updated_timeline.append((current_process[0], current_process[1], end_time)) #appends
-        i += 1
-
-    return(updated_timeline)
-
-def round_robin(processes):
-    quantum = 3
-    processes_copy = deepcopy(processes)
-    ready_queue = processes_copy.copy()
+def round_robin(processes, quantum, output_text):
+    ready_queue = processes.copy()
     timeline = []
     current_time = 0
 
     while ready_queue:
         ready_queue.sort(key=lambda x: (x.postprocess_arrival_time, x.priority, x.executed_before))
-
         current_process = ready_queue.pop(0)
+
         execution_time = min(quantum, current_process.remaining_time)
         current_process.remaining_time -= execution_time
         timeline.append((current_process.name, current_time, current_time + execution_time))
         current_time += execution_time
-        current_process.postprocess_arrival_time = current_time
 
         if current_process.remaining_time > 0:
             ready_queue.append(current_process)
@@ -106,11 +53,13 @@ def round_robin(processes):
         else:
             current_process.finishing_time = current_time
 
-    data_displayer9000("Round Robin", processes_copy, timeline)
+    output_text.config(state=tk.NORMAL)
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, data_displayer9000("Round Robin", processes, timeline))
+    output_text.config(state=tk.DISABLED)
 
-def non_preemp_sjf(processes):
-    processes_copy = deepcopy(processes)
-    ready_queue = processes_copy.copy()
+def non_preemp_sjf(processes, output_text):
+    ready_queue = processes.copy()
     timeline = []
     current_time = 0
     ready_queue.sort(key=lambda x: (x.burst_time, x.priority, x.arrival_time))
@@ -122,15 +71,19 @@ def non_preemp_sjf(processes):
                 break
 
         timeline.append((current_process.name, current_time, current_time + current_process.remaining_time))
+
         current_time += current_process.remaining_time
         current_process.finishing_time = current_time
         current_process.remaining_time = 0
 
-    data_displayer9000("Non Preemptive SJF", processes_copy, timeline)
+    output_text.config(state=tk.NORMAL)
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, data_displayer9000("Non Preemptive SJF", processes, timeline))
+    output_text.config(state=tk.DISABLED)
 
-def non_preemp_prio(processes):
-    processes_copy = deepcopy(processes)
-    ready_queue = processes_copy.copy()
+
+def non_preemp_prio(processes, output_text):
+    ready_queue = processes.copy()
     timeline = []
     current_time = 0
     ready_queue.sort(key=lambda x: (x.priority, x.arrival_time))
@@ -142,15 +95,19 @@ def non_preemp_prio(processes):
                 break
 
         timeline.append((current_process.name, current_time, current_time + current_process.remaining_time))
+
         current_time += current_process.remaining_time
         current_process.finishing_time = current_time
         current_process.remaining_time = 0
 
-    data_displayer9000("Non Preemptive Priority", processes_copy, timeline)
+    output_text.config(state=tk.NORMAL)
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, data_displayer9000("Non Preemptive Priority", processes, timeline))
+    output_text.config(state=tk.DISABLED)
 
-def preemp_sjk(processes):
-    processes_copy = deepcopy(processes)
-    ready_queue = processes_copy.copy()
+
+def preemp_sjk(processes, output_text):
+    ready_queue = processes.copy()
     timeline = []
     current_time = 0
 
@@ -171,11 +128,14 @@ def preemp_sjk(processes):
             current_process.finishing_time = current_time
             ready_queue.pop(index)
 
-    data_displayer9000("Preemptive SJF", processes_copy, timeline)
+    output_text.config(state=tk.NORMAL)
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, data_displayer9000("Preemptive SJF", processes, timeline))
+    output_text.config(state=tk.DISABLED)
 
-def preemp_prio(processes):
-    processes_copy = deepcopy(processes)
-    ready_queue = processes_copy.copy()
+
+def preemp_prio(processes, output_text):
+    ready_queue = processes.copy()
     timeline = []
     current_time = 0
     current_process = None
@@ -184,7 +144,7 @@ def preemp_prio(processes):
         ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time))
         index = None
         for i in range(len(ready_queue)):
-            if current_process != None and ready_queue[i].name == current_process.name:
+            if current_process is not None and ready_queue[i].name == current_process.name:
                 index = i
                 break
 
@@ -208,59 +168,82 @@ def preemp_prio(processes):
             ready_queue.pop(index)
             current_process = None
 
-    data_displayer9000("Preemptive Prio", processes_copy, timeline)
+    output_text.config(state=tk.NORMAL)
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, data_displayer9000("Preemptive Priority", processes, timeline))
+    output_text.config(state=tk.DISABLED)
 
-def display_round_robin():
-    result_text.delete(1.0, END)
-    round_robin(processes)
+def run_algorithm(algorithm, process_entries, quantum_entry, output_text):
+    processes = []
+    for i, entry_row in enumerate(process_entries):
+        arrival_time = int(entry_row[0].get())
+        burst_time = int(entry_row[1].get())
+        priority = int(entry_row[2].get())
+        processes.append(Process(f"P{i}", arrival_time, burst_time, priority))
 
-def display_non_preemp_sjf():
-    result_text.delete(1.0, END)
-    non_preemp_sjf(processes)
+    if algorithm == round_robin:
+        quantum = int(quantum_entry.get())
+        algorithm(deepcopy(processes), quantum, output_text)
+    elif algorithm in [non_preemp_sjf, non_preemp_prio, preemp_prio, preemp_sjk]:
+        algorithm(deepcopy(processes), output_text)
+    else:
+        algorithm(deepcopy(processes), output_text, quantum_entry)
 
-def display_non_preemp_prio():
-    result_text.delete(1.0, END)
-    non_preemp_prio(processes)
+def create_gui():
+    window = tk.Tk()
+    window.title("OS Scheduling Simulator")
 
-def display_preemp_sjk():
-    result_text.delete(1.0, END)
-    preemp_sjk(processes)
+    process_entries = []
+    labels = ["Arrival Time", "Burst Time", "Priority"]
 
-def display_preemp_prio():
-    result_text.delete(1.0, END)
-    preemp_prio(processes)
+    num_processes_var = IntVar()
+    num_processes_label = Label(window, text="Number of Processes:")
+    num_processes_label.grid(row=0, column=0, padx=10)
+    num_processes_entry = Entry(window, textvariable=num_processes_var)
+    num_processes_entry.grid(row=0, column=1, padx=10)
 
-# processes
-processes = [
-    Process("P0", 0, 6, 3),
-    Process("P1", 1, 4, 3),
-    Process("P2", 5, 6, 1),
-    Process("P3", 6, 6, 1),
-    Process("P4", 7, 6, 5),
-    Process("P5", 8, 6, 6)
+    def get_num_processes():
+        num_processes = num_processes_var.get()
+        process_entries.clear()
 
-]
+        for i in range(num_processes):
+            entry_row = []
+            for j, label in enumerate(labels):
+                entry_label = Label(window, text=f"{label} P{i}")
+                entry_label.grid(row=i + 7, column=j * 2, padx=10)  
+                entry = Entry(window)
+                entry.grid(row=i + 7, column=j * 2 + 1, padx=10)  
+                entry_row.append(entry)
+            process_entries.append(entry_row)
 
-# GUI setup
-root = Tk()
-root.title("OS Scheduling Simulator")
+    num_processes_button = Button(window, text="Set Processes", command=get_num_processes)
+    num_processes_button.grid(row=0, column=2, padx=10)
 
-round_robin_button = Button(root, text="Round Robin", command=display_round_robin)
-round_robin_button.pack()
+    quantum_label = Label(window, text="Time Quantum for Round Robin:")
+    quantum_label.grid(row=0, column=3, padx=10)
 
-non_preemp_sjf_button = Button(root, text="Non Preemptive SJF", command=display_non_preemp_sjf)
-non_preemp_sjf_button.pack()
+    quantum_entry = Entry(window)
+    quantum_entry.grid(row=0, column=4, padx=10)
 
-non_preemp_prio_button = Button(root, text="Non Preemptive Priority", command=display_non_preemp_prio)
-non_preemp_prio_button.pack()
+    run_button_rr = Button(window, text="Run Round Robin", command=lambda: run_algorithm(round_robin, process_entries, quantum_entry, output_text))
+    run_button_rr.grid(row=0, column=5, padx=10)
 
-preemp_sjk_button = Button(root, text="Preemptive SJF", command=display_preemp_sjk)
-preemp_sjk_button.pack()
+    run_button_sjf = Button(window, text="Run Non-Preemptive SJF", command=lambda: run_algorithm(non_preemp_sjf, process_entries, quantum_entry, output_text))
+    run_button_sjf.grid(row=1, column=5, padx=10)
 
-preemp_prio_button = Button(root, text="Preemptive Priority", command=display_preemp_prio)
-preemp_prio_button.pack()
+    run_button_prio = Button(window, text="Run Non-Preemptive Priority", command=lambda: run_algorithm(non_preemp_prio, process_entries, quantum_entry, output_text))
+    run_button_prio.grid(row=2, column=5, padx=10)
 
-result_text = Text(root, height=20, width=120)
-result_text.pack()
+    run_button_sjk = Button(window, text="Run Preemptive SJF", command=lambda: run_algorithm(preemp_sjk, process_entries, quantum_entry, output_text))
+    run_button_sjk.grid(row=3, column=5, padx=10)
 
-root.mainloop()
+    run_button_prio_preemp = Button(window, text="Run Preemptive Priority", command=lambda: run_algorithm(preemp_prio, process_entries, quantum_entry, output_text))
+    run_button_prio_preemp.grid(row=4, column=5, padx=10)
+
+    output_text = Text(window, height=20, width=125, state=tk.DISABLED)
+    output_text.grid(row=6, column=0, columnspan=10, padx=10, pady=10)
+
+    window.mainloop()
+
+if __name__ == "__main__":
+    create_gui()
