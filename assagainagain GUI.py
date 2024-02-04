@@ -63,7 +63,7 @@ def plot_gantt_chart(timeline):
     return output
 
 
-def data_displayer9000(method, processes, timeline):
+def data_displayer(method, processes, timeline):
     result = f"{method}\n"
     table = PrettyTable()
     table.field_names = ["Process", "Arrival Time", "Burst Time", "Finishing Time", "Turnaround Time", "Waiting Time"]
@@ -104,7 +104,7 @@ def round_robin(processes, quantum, output_text):
 
     output_text.config(state=tk.NORMAL)
     output_text.delete(1.0, tk.END)
-    output_text.insert(tk.END, data_displayer9000("Round Robin", processes, timeline))
+    output_text.insert(tk.END, data_displayer("Round Robin", processes, timeline))
     output_text.config(state=tk.DISABLED)
 
 def non_preemp_sjf(processes, output_text):
@@ -127,7 +127,7 @@ def non_preemp_sjf(processes, output_text):
 
     output_text.config(state=tk.NORMAL)
     output_text.delete(1.0, tk.END)
-    output_text.insert(tk.END, data_displayer9000("Non Preemptive SJF", processes, timeline))
+    output_text.insert(tk.END, data_displayer("Non Preemptive SJF", processes, timeline))
     output_text.config(state=tk.DISABLED)
 
 
@@ -151,7 +151,7 @@ def non_preemp_prio(processes, output_text):
 
     output_text.config(state=tk.NORMAL)
     output_text.delete(1.0, tk.END)
-    output_text.insert(tk.END, data_displayer9000("Non Preemptive Priority", processes, timeline))
+    output_text.insert(tk.END, data_displayer("Non Preemptive Priority", processes, timeline))
     output_text.config(state=tk.DISABLED)
 
 
@@ -179,7 +179,7 @@ def preemp_sjk(processes, output_text):
 
     output_text.config(state=tk.NORMAL)
     output_text.delete(1.0, tk.END)
-    output_text.insert(tk.END, data_displayer9000("Preemptive SJF", processes, timeline))
+    output_text.insert(tk.END, data_displayer("Preemptive SJF", processes, timeline))
     output_text.config(state=tk.DISABLED)
 
 
@@ -219,7 +219,7 @@ def preemp_prio(processes, output_text):
 
     output_text.config(state=tk.NORMAL)
     output_text.delete(1.0, tk.END)
-    output_text.insert(tk.END, data_displayer9000("Preemptive Priority", processes, timeline))
+    output_text.insert(tk.END, data_displayer("Preemptive Priority", processes, timeline))
     output_text.config(state=tk.DISABLED)
 
 def run_algorithm(algorithm, process_entries, quantum_entry, output_text):
