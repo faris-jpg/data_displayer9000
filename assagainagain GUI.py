@@ -1,3 +1,9 @@
+'''README:
+PrettyTable library is needed to run this code,
+to install:
+python -m pip install -u prettytable
+'''
+
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
@@ -39,9 +45,9 @@ def remove_duplicates(timeline):
 
 def plot_gantt_chart(timeline):
     timeline = remove_duplicates(timeline)
-    windowSize = WINDOWWIDTH #SET WINDOW SIZE HERE (if no global)
+    windowSize = WINDOWWIDTH 
     timeEnd = timeline[-1][2] 
-    timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
+    timediv = floor(windowSize / timeEnd - 2) + 1 #finds the floor of each timedivision (how many char per second)
 
     #gets the output for all the process names
     nameOutput = ''
@@ -155,7 +161,7 @@ def non_preemp_prio(processes, output_text):
     output_text.config(state=tk.DISABLED)
 
 
-def preemp_sjk(processes, output_text):
+def preemp_sjf(processes, output_text):
     ready_queue = processes.copy()
     timeline = []
     current_time = 0
@@ -190,16 +196,17 @@ def preemp_prio(processes, output_text):
     current_process = None
 
     while ready_queue:
-        ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time))
+        ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time)) #keep checking for lowest priority and new arrival times
         index = None
         for i in range(len(ready_queue)):
-            if current_process is not None and ready_queue[i].name == current_process.name:
+            if current_process is not None and ready_queue[i].name == current_process.name: #since queue is re-sorted each loop, find new index of the process
                 index = i
                 break
 
-            if ready_queue[i].arrival_time <= current_time and (
-                    current_process is None or current_process.priority != ready_queue[i].priority):
-                current_process = ready_queue[i]
+            if ready_queue[i].postprocess_arrival_time <= current_time and ( #check if process has arrived
+                    current_process is None or current_process.priority != ready_queue[i].priority): #priority inequality check is for assumption i.
+                
+                current_process = ready_queue[i] 
                 index = i
                 break
 
@@ -233,7 +240,7 @@ def run_algorithm(algorithm, process_entries, quantum_entry, output_text):
     if algorithm == round_robin:
         quantum = int(quantum_entry.get())
         algorithm(deepcopy(processes), quantum, output_text)
-    elif algorithm in [non_preemp_sjf, non_preemp_prio, preemp_prio, preemp_sjk]:
+    elif algorithm in [non_preemp_sjf, non_preemp_prio, preemp_prio, preemp_sjf]:
         algorithm(deepcopy(processes), output_text)
     else:
         algorithm(deepcopy(processes), output_text, quantum_entry)
@@ -283,7 +290,7 @@ def create_gui():
     run_button_prio = Button(window, text="Run Non-Preemptive Priority", command=lambda: run_algorithm(non_preemp_prio, process_entries, quantum_entry, output_text))
     run_button_prio.grid(row=2, column=5, padx=10)
 
-    run_button_sjk = Button(window, text="Run Preemptive SJF", command=lambda: run_algorithm(preemp_sjk, process_entries, quantum_entry, output_text))
+    run_button_sjk = Button(window, text="Run Preemptive SJF", command=lambda: run_algorithm(preemp_sjf, process_entries, quantum_entry, output_text))
     run_button_sjk.grid(row=3, column=5, padx=10)
 
     run_button_prio_preemp = Button(window, text="Run Preemptive Priority", command=lambda: run_algorithm(preemp_prio, process_entries, quantum_entry, output_text))
