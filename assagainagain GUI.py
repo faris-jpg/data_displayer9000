@@ -17,6 +17,7 @@ class Process:
         self.postprocess_arrival_time = arrival_time
 
 def plot_gantt_chart(timeline):
+    timeline = removeDuplicates(timeline)
     windowSize = 270 #SET WINDOW SIZE HERE (if no global)
     timeEnd = timeline[-1][2] 
     timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
@@ -36,10 +37,12 @@ def plot_gantt_chart(timeline):
 
     #outputs the table with borders
     border = '+' + ''.join('-' for x in range(len(timeOutput) - 1)) + '+'
-    print(border)
-    print('|' + nameOutput)
-    print(timeOutput)
-    print(border)
+    
+    output = border + '\n' 
+            + '|' + nameOutput + '\n'
+            + timeOutput + '\n'
+            + border
+    return output
 
 def remove_duplicates(timeline):
     updated_timeline = []  # new list for new timeline
