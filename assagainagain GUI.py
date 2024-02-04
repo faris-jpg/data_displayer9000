@@ -16,6 +16,25 @@ class Process:
         self.finishing_time = 0
         self.postprocess_arrival_time = arrival_time
 
+def remove_duplicates(timeline):
+    updated_timeline = []  # new list for new timeline
+    i = 0  #iterator
+
+    while i < len(timeline):
+        current_process = timeline[i]
+        end_time = current_process[2] 
+
+        #checks next process if it is the same id
+        while i + 1 < len(timeline) and current_process[0] == timeline[i + 1][0]:
+            end_time = timeline[i + 1][2]  #update end time
+            i += 1
+
+        updated_timeline.append((current_process[0], current_process[1], end_time)) #appends
+        i += 1
+
+    return(updated_timeline)
+
+
 def plot_gantt_chart(timeline):
     timeline = removeDuplicates(timeline)
     windowSize = 270 #SET WINDOW SIZE HERE (if no global)
@@ -44,23 +63,6 @@ def plot_gantt_chart(timeline):
             + border
     return output
 
-def remove_duplicates(timeline):
-    updated_timeline = []  # new list for new timeline
-    i = 0  #iterator
-
-    while i < len(timeline):
-        current_process = timeline[i]
-        end_time = current_process[2] 
-
-        #checks next process if it is the same id
-        while i + 1 < len(timeline) and current_process[0] == timeline[i + 1][0]:
-            end_time = timeline[i + 1][2]  #update end time
-            i += 1
-
-        updated_timeline.append((current_process[0], current_process[1], end_time)) #appends
-        i += 1
-
-    return(updated_timeline)
 
 def data_displayer9000(method, processes, timeline):
     result = f"{method}\n"
@@ -77,7 +79,7 @@ def data_displayer9000(method, processes, timeline):
             (process.finishing_time - process.arrival_time) - process.burst_time
         ])
 
-    result += str(table) + "\n" + str(timeline)
+    result += str(table) + "\n" + plot_gantt_chart(timeline)
     return result
 
 def round_robin(processes, quantum, output_text):
