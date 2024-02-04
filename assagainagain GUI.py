@@ -48,6 +48,7 @@ def round_robin(processes, quantum, output_text):
         current_time += execution_time
 
         if current_process.remaining_time > 0:
+            current_process.postprocess_arrival_time = current_time
             ready_queue.append(current_process)
             current_process.executed_before = True
         else:
