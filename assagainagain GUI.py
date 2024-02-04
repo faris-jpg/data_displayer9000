@@ -36,7 +36,7 @@ def remove_duplicates(timeline):
 
 
 def plot_gantt_chart(timeline):
-    timeline = removeDuplicates(timeline)
+    timeline = remove_duplicates(timeline)
     windowSize = 270 #SET WINDOW SIZE HERE (if no global)
     timeEnd = timeline[-1][2] 
     timediv = floor(windowSize / timeEnd - 2) #finds the floor of each timedivision (how many char per second)
