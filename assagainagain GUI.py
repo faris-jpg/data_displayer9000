@@ -167,7 +167,7 @@ def preemp_sjf(processes, output_text):
     timeline = []
     current_time = 0
 
-    # '''
+
     # for each loop, sort by the remaining time, so shortest job always on top.
     # and then by priority, and then by arrival
 
@@ -178,7 +178,7 @@ def preemp_sjf(processes, output_text):
     # and then process the process, if it has completed, pop
 
     # loop
-    # '''
+
 
     while ready_queue:
         ready_queue.sort(key=lambda x: (x.remaining_time, x.priority, x.postprocess_arrival_time))
@@ -208,7 +208,7 @@ def preemp_prio(processes, output_text):
     timeline = []
     current_time = 0
     current_process = None
-    # '''
+
     # for each loop, sort by priority, and then by arrival
 
     # reset the index variable as sorting can mix up the index
@@ -222,8 +222,6 @@ def preemp_prio(processes, output_text):
     #         save the index
         
     # if index is none, no process has arrived, increment time
-
-    # '''
 
     while ready_queue:
 
