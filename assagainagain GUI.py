@@ -1,8 +1,8 @@
-'''README:
-PrettyTable library is needed to run this code,
-to install:
-python -m pip install -u prettytable
-'''
+# '''README:
+# PrettyTable library is needed to run this code,
+# to install:
+# python -m pip install -u prettytable
+# '''
 
 import tkinter as tk
 from tkinter import *
@@ -80,8 +80,8 @@ def data_displayer(method, processes, timeline):
             process.arrival_time,
             process.burst_time,
             process.finishing_time,
-            process.finishing_time - process.arrival_time,
-            (process.finishing_time - process.arrival_time) - process.burst_time
+            process.finishing_time - process.arrival_time, #turnaround time
+            (process.finishing_time - process.arrival_time) - process.burst_time #waiting time
         ])
 
     result += str(table) + "\n" + plot_gantt_chart(timeline)
@@ -93,17 +93,18 @@ def round_robin(processes, quantum, output_text):
     current_time = 0
 
     while ready_queue:
-        ready_queue.sort(key=lambda x: (x.postprocess_arrival_time, x.priority, x.executed_before))
-        current_process = ready_queue.pop(0)
+        ready_queue.sort(key=lambda x: (x.postprocess_arrival_time, x.priority, x.executed_before)) 
+        #sorts by arrival time, then by priority, then by executed before. according to assumption iii
+        current_process = ready_queue.pop(0) #takes first process
 
-        execution_time = min(quantum, current_process.remaining_time)
+        execution_time = min(quantum, current_process.remaining_time) #check which is less, quantum or remaining time
         current_process.remaining_time -= execution_time
         timeline.append((current_process.name, current_time, current_time + execution_time))
         current_time += execution_time
 
-        if current_process.remaining_time > 0:
+        if current_process.remaining_time > 0: #if it hasnt completed
             current_process.postprocess_arrival_time = current_time
-            ready_queue.append(current_process)
+            ready_queue.append(current_process) #put back into ready queue
             current_process.executed_before = True
         else:
             current_process.finishing_time = current_time
@@ -117,12 +118,12 @@ def non_preemp_sjf(processes, output_text):
     ready_queue = processes.copy()
     timeline = []
     current_time = 0
-    ready_queue.sort(key=lambda x: (x.burst_time, x.priority, x.arrival_time))
+    ready_queue.sort(key=lambda x: (x.burst_time, x.priority, x.arrival_time)) #sort by burst, prio and then arrival
 
     while ready_queue:
-        for i in range(len(ready_queue)):
-            if ready_queue[i].arrival_time <= current_time:
-                current_process = ready_queue.pop(i)
+        for i in range(len(ready_queue)): #checks each process
+            if ready_queue[i].arrival_time <= current_time: #if it has arrived,
+                current_process = ready_queue.pop(i) #make it current process and remove from queue
                 break
 
         timeline.append((current_process.name, current_time, current_time + current_process.remaining_time))
@@ -141,11 +142,11 @@ def non_preemp_prio(processes, output_text):
     ready_queue = processes.copy()
     timeline = []
     current_time = 0
-    ready_queue.sort(key=lambda x: (x.priority, x.arrival_time))
+    ready_queue.sort(key=lambda x: (x.priority, x.arrival_time)) #sort by priority and then by arrival
 
     while ready_queue:
         for i in range(len(ready_queue)):
-            if ready_queue[i].arrival_time <= current_time:
+            if ready_queue[i].arrival_time <= current_time: #checks if it has arrived
                 current_process = ready_queue.pop(i)
                 break
 
@@ -165,6 +166,19 @@ def preemp_sjf(processes, output_text):
     ready_queue = processes.copy()
     timeline = []
     current_time = 0
+
+    # '''
+    # for each loop, sort by the remaining time, so shortest job always on top.
+    # and then by priority, and then by arrival
+
+    # and then iterate each process and check if it has arrived
+
+    # if process at i has arrived, make it the current process and save the index
+
+    # and then process the process, if it has completed, pop
+
+    # loop
+    # '''
 
     while ready_queue:
         ready_queue.sort(key=lambda x: (x.remaining_time, x.priority, x.postprocess_arrival_time))
@@ -194,18 +208,35 @@ def preemp_prio(processes, output_text):
     timeline = []
     current_time = 0
     current_process = None
+    # '''
+    # for each loop, sort by priority, and then by arrival
+
+    # reset the index variable as sorting can mix up the index
+
+    # for each entry,
+    #     if there is a process running, and the current entry is the same process, (for assumption i)
+    #         save the new index
+
+    #     if the current entry has arrived, and (there isnt a process running OR the new process has a different priority)
+    #         current entry becomes current process
+    #         save the index
+        
+    # if index is none, no process has arrived, increment time
+
+    # '''
 
     while ready_queue:
-        ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time)) #keep checking for lowest priority and new arrival times
+
+        ready_queue.sort(key=lambda x: (x.priority, x.postprocess_arrival_time))
         index = None
+
         for i in range(len(ready_queue)):
-            if current_process is not None and ready_queue[i].name == current_process.name: #since queue is re-sorted each loop, find new index of the process
+
+            if current_process is not None and ready_queue[i].name == current_process.name:
                 index = i
                 break
 
-            if ready_queue[i].postprocess_arrival_time <= current_time and ( #check if process has arrived
-                    current_process is None or current_process.priority != ready_queue[i].priority): #priority inequality check is for assumption i.
-                
+            if ready_queue[i].postprocess_arrival_time <= current_time and (current_process is None or current_process.priority != ready_queue[i].priority):
                 current_process = ready_queue[i] 
                 index = i
                 break
